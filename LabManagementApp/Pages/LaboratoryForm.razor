@@ -1,0 +1,88 @@
+﻿@page "/laboratories/create"
+@page "/laboratories/edit/{id:int}"
+@inject LaboratoryService LabService
+@inject SupervisorService SuperviseurService
+@inject NavigationManager Navigation
+
+<h3>@(IsEditing ? "Edit Laboratory" : "Create Laboratory")</h3>
+
+@if (supervisors == null)
+{
+    <p>Loading supervisors...</p>
+}
+else
+{
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <form>
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input class="form-control" @bind="lab.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Creation Date</label>
+        <input type="date" class="form-control" @bind="lab.CreationDate" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Address</label>
+        <input class="form-control" @bind="lab.Address" />
+    </div>
+
+    <div class="mb-5">
+        <label class="form-label">Supervisor</label>
+        @* <input class="form-control" @bind="lab.Supervisor" /> *@
+        <select @bind="lab.SupervisorId" class="form-control">
+            <option value="">-- Select Supervisor --</option>
+            @foreach (var supervisor in supervisors)
+            {
+                <option value="@supervisor.Id">@supervisor.FullName</option>
+            }
+        </select>
+    </div>
+    <div class="mt-3">
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <button class="btn btn-primary" @onclick="Save">Save</button>
+    </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
+
+@code {
+    [Parameter] public int? id { get; set; }
+    private Laboratory lab = new();
+    private bool IsEditing => id.HasValue;
+    private List<Supervisor>? supervisors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        supervisors = await SuperviseurService.GetSupervisorsAsync();
+
+        if (IsEditing)
+        {
+            var existingLab = await LabService.GetLaboratoryByIdAsync(id.Value);
+            if (existingLab != null)
+            {
+                lab = existingLab;
+            }
+        }
+    }
+
+    async Task Save()
+    {
+        bool success;
+        if (IsEditing)
+            success = await LabService.UpdateLaboratoryAsync(lab);
+        else
+            success = await LabService.CreateLaboratoryAsync(lab);
+
+        if (success)
+            Navigation.NavigateTo("/laboratories");
+    }
+
+    private void Cancel() => Navigation.NavigateTo("/laboratories");
+}

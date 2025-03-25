@@ -1,0 +1,67 @@
+@page "/laboratories"
+@* @inject ApiService ApiService *@
+@inject LaboratoryService LabService
+@inject NavigationManager Navigation
+
+<h3>Laboratoires</h3>
+<button @onclick="GoToCreate">Ajouter un Laboratoire</button>
+
+@if (laboratories == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Creation Date</th>
+                <th>Address</th>
+                <th>Supervisor</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var lab in laboratories)
+            {
+                <tr>
+                    <td>@lab.Name</td>
+                    <td>@lab.CreationDate.ToShortDateString()</td>
+                    <td>@lab.Address</td>
+                    <td>@lab.Supervisor</td>
+                    <td>
+                        <button @onclick="() => GoToEdit(lab.Id)">Edit</button>
+                        <button @onclick="() => DeleteLab(lab.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Laboratory> laboratories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+       // laboratories = await ApiService.GetLaboratoriesAsync();
+        laboratories = await LabService.GetLaboratoriesAsync();
+    }
+
+    private void GoToCreate() => Navigation.NavigateTo("/laboratories/create");
+
+    private void GoToEdit(int id) => Navigation.NavigateTo($"/laboratories/edit/{id}");
+
+    private async Task DeleteLab(int id)
+    {
+        // await LabService.DeleteRoomAsync(id);
+        // rooms = await LabService.GetRoomsAsync();
+        if (await LabService.DeleteLaboratoryAsync(id))
+        {
+            laboratories = await LabService.GetLaboratoriesAsync();
+            StateHasChanged();
+        }
+    }
+
+}
