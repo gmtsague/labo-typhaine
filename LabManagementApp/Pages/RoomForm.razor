@@ -1,0 +1,82 @@
+@page "/rooms/create"
+@page "/rooms/edit/{id:int}"
+@inject RoomService RoomService
+@inject LaboratoryService LabService
+@inject NavigationManager Navigation
+
+<h3>@(isEdit ? "Edit" : "Create") Room</h3>
+
+@* <input @bind="room.Name" placeholder="Room Name" />
+<input type="number" @bind="room.Capacity" placeholder="Capacity" />
+
+<button @onclick="SaveRoom">Save</button> *@
+
+@if (laboratories == null)
+{
+    <p>Loading laboratories...</p>
+}
+else
+{
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <form>
+                <div class="mb-3">
+                    <label for="roomName" class="form-label">Room Name</label>
+                    <input type="text" id="roomName" class="form-control" @bind="room.Name" placeholder="Enter room name" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="roomCapacity" class="form-label">Capacity</label>
+                    <input type="number" id="roomCapacity" class="form-control" @bind="room.Capacity" placeholder="Enter capacity" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Laboratoire</label>
+                    <select @bind="room.LaboratoryId" class="form-control">
+                            <option value="">-- Select Laboratoire --</option>
+                            @foreach (var item in laboratories)
+                        {
+                                <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="mt-5">
+                    <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveRoom">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
+
+@code {
+    private Room room = new();
+    private bool isEdit = false;
+    private List<Laboratory>? laboratories;
+
+    [Parameter] public int? Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        laboratories = await LabService.GetLaboratoriesAsync();
+
+        if (Id.HasValue)
+        {
+            isEdit = true;
+            room = await RoomService.GetRoomByIdAsync(Id.Value);
+        }
+    }
+
+    private async Task SaveRoom()
+    {
+        if (isEdit)
+            await RoomService.UpdateRoomAsync(room);
+        else
+            await RoomService.CreateRoomAsync(room);
+
+        Navigation.NavigateTo("/rooms");
+    }
+
+    private void Cancel() => Navigation.NavigateTo("/rooms");
+}

@@ -1,0 +1,57 @@
+@page "/rooms"
+@inject RoomService RoomService
+@inject NavigationManager Navigation
+
+<h3>Salles de TP</h3>
+<button @onclick="GoToCreate">Ajouter une salle de TP</button>
+
+@if (rooms == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Capacity</th>
+            <th>Laboratory</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var room in rooms)
+        {
+            <tr>
+                <td>@room.Name</td>
+                <td>@room.Capacity</td>
+                <td>@room.Laboratory?.Name</td>
+                <td>
+                    <button @onclick="() => GoToEdit(room.Id)">Edit</button>
+                    <button @onclick="() => DeleteRoom(room.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+
+@code {
+    private List<Room> rooms = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        rooms = await RoomService.GetRoomsAsync();
+    }
+
+    private void GoToCreate() => Navigation.NavigateTo("/rooms/create");
+
+    private void GoToEdit(int id) => Navigation.NavigateTo($"/rooms/edit/{id}");
+
+    private async Task DeleteRoom(int id)
+    {
+        await RoomService.DeleteRoomAsync(id);
+        rooms = await RoomService.GetRoomsAsync();
+    }
+}
