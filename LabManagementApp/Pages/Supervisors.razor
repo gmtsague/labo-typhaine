@@ -1,0 +1,57 @@
+@page "/supervisors"
+@inject SupervisorService SupervisorService
+@inject NavigationManager Navigation
+
+<h3>Superviseurs</h3>
+<button @onclick="GoToCreate">Ajouter un Superviseur</button>
+
+@if (supervisors == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var supervisor in supervisors)
+        {
+            <tr>
+                <td>@($"{supervisor.FullName} ")</td>
+                <td>@supervisor.Email</td>
+                <td>@supervisor.Phone</td>
+                <td>
+                    <button @onclick="() => GoToEdit(supervisor.Id)">Edit</button>
+                    <button @onclick="() => DeleteSupervisor(supervisor.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+
+@code {
+    private List<Supervisor> supervisors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        supervisors = await SupervisorService.GetSupervisorsAsync();
+    }
+
+    private void GoToCreate() => Navigation.NavigateTo("/supervisors/create");
+
+    private void GoToEdit(int id) => Navigation.NavigateTo($"/supervisors/edit/{id}");
+
+    private async Task DeleteSupervisor(int id)
+    {
+        await SupervisorService.DeleteSupervisorAsync(id);
+        supervisors = await SupervisorService.GetSupervisorsAsync();
+    }
+}
