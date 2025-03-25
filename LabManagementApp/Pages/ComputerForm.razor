@@ -1,0 +1,91 @@
+@page "/computers/create"
+@page "/computers/edit/{id:int}"
+@inject ComputerService ComputerService
+@inject NavigationManager Navigation
+
+<h3>@(isEdit ? "Edit" : "Create") Computer</h3>
+
+@* 
+    <input @bind="computer.Name" placeholder="Computer Name" />
+    <input @bind="computer.IpAddress" placeholder="IP Address" />
+    <input @bind="computer.RamSize" placeholder="RAM (GB)" />
+    <input @bind="computer.DiskSize" placeholder="Disk (GB)" />
+    <input @bind="computer.OperatingSystem" placeholder="OS" />
+
+<button @onclick="SaveComputer">Save</button> *@
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <form>
+                <div class="mb-3">
+                    <label for="computerName" class="form-label">Computer Name</label>
+                    <input type="text" id="computerName" class="form-control" @bind="computer.ComputerName" placeholder="Enter computer name" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="macAddress" class="form-label">Mac Address</label>
+                    <input type="text" id="macAddress" class="form-control" @bind="computer.MacAddress" placeholder="Enter MAC Address" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="ipAddress" class="form-label">IP Address</label>
+                    <input type="text" id="ipAddress" class="form-control" @bind="computer.IpAddress" placeholder="Enter IP Address" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="ramSize" class="form-label">RAM (GB)</label>
+                    <input type="text" id="ramSize" class="form-control" @bind="computer.RamSize" placeholder="Enter RAM size in GB" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="diskSize" class="form-label">Disk Size (GB)</label>
+                    <input type="text" id="diskSize" class="form-control" @bind="computer.DiskSize" placeholder="Enter Disk size in GB" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="diskBrand" class="form-label">Marque du disque</label>
+                    <input type="text" id="diskBrand" class="form-control" @bind="computer.DiskBrand" placeholder="Enter Brand Disk" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="operatingSystem" class="form-label">Operating System</label>
+                    <input type="text" id="operatingSystem" class="form-control" @bind="computer.OperatingSystem" placeholder="Enter Operating System" />
+                </div>
+
+                <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveComputer">Save</button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Computer computer = new();
+    private bool isEdit = false;
+
+    [Parameter] public int? Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            isEdit = true;
+            computer = await ComputerService.GetComputerByIdAsync(Id.Value);
+        }
+    }
+
+    private async Task SaveComputer()
+    {
+        if (isEdit)
+            await ComputerService.UpdateComputerAsync(computer);
+        else
+            await ComputerService.CreateComputerAsync(computer);
+
+        Navigation.NavigateTo("/computers");
+    }
+
+    private void Cancel() => Navigation.NavigateTo("/computers");
+
+}

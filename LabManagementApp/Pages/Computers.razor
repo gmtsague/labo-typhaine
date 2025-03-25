@@ -1,0 +1,68 @@
+@page "/computers"
+@inject ComputerService ComputerService
+@inject NavigationManager Navigation
+
+<h3>Ordinateurs</h3>
+
+<button @onclick="GoToCreate">Ajouter un ordinateur</button>
+
+@if (computers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>IP Address</th>
+            <th>RAM</th>
+            <th>Disk</th>
+            <th>Disk Brand</th>
+            <th>OS</th>
+            <th>SaveDate</th>
+            <th>Room</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var computer in computers)
+        {
+            <tr>
+                <td>@computer.ComputerName</td>
+                <td>@computer.IpAddress</td>
+                <td>@computer.RamSize GB</td>
+                <td>@computer.DiskSize GB</td>
+                <td>@computer.DiskBrand GB</td>
+                <td>@computer.OperatingSystem</td>
+                <td>@computer.SaveDate</td>
+                <td>@computer.Room?.Name</td>
+                <td>
+                    <button @onclick="() => GoToEdit(computer.Id)">Edit</button>
+                    <button @onclick="() => DeleteComputer(computer.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+
+@code {
+    private List<Computer> computers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        computers = await ComputerService.GetComputersAsync();
+    }
+
+    private void GoToCreate() => Navigation.NavigateTo("/computers/create");
+
+    private void GoToEdit(int id) => Navigation.NavigateTo($"/computers/edit/{id}");
+
+    private async Task DeleteComputer(int id)
+    {
+        await ComputerService.DeleteComputerAsync(id);
+        computers = await ComputerService.GetComputersAsync();
+    }
+}
