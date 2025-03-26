@@ -34,7 +34,7 @@ else
     <div class="mb-5">
         <label class="form-label">Supervisor</label>
         @* <input class="form-control" @bind="lab.Supervisor" /> *@
-        <select @bind="lab.SupervisorId" class="form-control">
+        <select @bind="lab.SupervisorId"  class="form-select">
             <option value="">-- Select Supervisor --</option>
             @foreach (var supervisor in supervisors)
             {
