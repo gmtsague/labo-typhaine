@@ -45,7 +45,7 @@ public class ComputerController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetComputers()
     {
-        return Ok(await _context.Computers.ToListAsync());
+        return Ok(await _context.Computers.Include(r => r.Room).ToListAsync());
     }
 
     // GET: api/computers/{id}
