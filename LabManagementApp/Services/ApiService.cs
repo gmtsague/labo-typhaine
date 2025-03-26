@@ -35,7 +35,7 @@ public class ApiService
 
     public async Task<bool> AssignComputerToRoomAsync(int computerId, int roomId)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/computers/{computerId}/assign/{roomId}", new { roomId });
+        var response = await _httpClient.PutAsJsonAsync($"api/computers/{computerId}/assign-room/{roomId}", new { roomId });
         return response.IsSuccessStatusCode;
     }
 
