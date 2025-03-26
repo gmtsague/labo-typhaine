@@ -1,10 +1,31 @@
 @page "/computers"
 @inject ComputerService ComputerService
+@inject ApiService ApiService
+@inject RoomService RoomService
 @inject NavigationManager Navigation
 
 <h3>Ordinateurs</h3>
+<table class="table">
+<tbody>
+    <tr>
+        <td><button @onclick="GoToCreate">Ajouter un ordinateur</button></td>
+        <td>
+            <label> Assigner un PC à une salle: </label>
+            <select @bind="selectedRoomId" class="form-select">
+                <option value="">Selectionner une salle</option>
+                @foreach (var room in rooms)
+                {
+                    <option value="@room.Id">@room.Name</option>
+                }
+            </select>
+        </td>
+    </tr>
+</tbody>
+</table>
 
-<button @onclick="GoToCreate">Ajouter un ordinateur</button>
+
+
+
 
 @if (computers == null)
 {
@@ -41,6 +62,7 @@ else
                 <td>
                     <button @onclick="() => GoToEdit(computer.Id)">Edit</button>
                     <button @onclick="() => DeleteComputer(computer.Id)">Delete</button>
+                    <button @onclick="()=> AssignToRoom(computer.Id)">Assign</button>
                 </td>
             </tr>
         }
@@ -50,10 +72,18 @@ else
 
 @code {
     private List<Computer> computers = new();
+    private List<Room> rooms = new();
+    private int selectedRoomId;
 
+    private async Task AssignToRoom(int computerId)
+    {
+        await ApiService.AssignComputerToRoomAsync(computerId, selectedRoomId);
+        Navigation.Refresh();
+    }
     protected override async Task OnInitializedAsync()
     {
         computers = await ComputerService.GetComputersAsync();
+        rooms = await RoomService.GetRoomsAsync();
     }
 
     private void GoToCreate() => Navigation.NavigateTo("/computers/create");
